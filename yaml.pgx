@@ -1,0 +1,9 @@
+stream: <document>*
+
+document:
+    <directive>*
+    <header>
+    <node>
+    <trailer>?
+
+
