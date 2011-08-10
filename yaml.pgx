@@ -2,8 +2,9 @@ stream: <document>*
 
 document:
     <directive>*
-    <header>
+    <header>?
     <node>
     <trailer>?
 
+node:
 
