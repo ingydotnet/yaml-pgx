@@ -1,0 +1,39 @@
+{
+   "_FIRST_RULE" : "stream",
+   "document" : {
+      "+all" : [
+         {
+            "+rule" : "directive",
+            "<" : "*"
+         },
+         {
+            "+rule" : "header",
+            "<" : "?"
+         },
+         {
+            "+rule" : "top_node"
+         },
+         {
+            "+rule" : "trailer",
+            "<" : "?"
+         }
+      ]
+   },
+   "header" : {
+      "+re" : "--- *\\r?\\n?"
+   },
+   "stream" : {
+      "+rule" : "document",
+      "<" : "*"
+   },
+   "top_node" : {
+      "+any" : [
+         {
+            "+rule" : "block_node"
+         },
+         {
+            "+rule" : "flow_node"
+         }
+      ]
+   }
+}
