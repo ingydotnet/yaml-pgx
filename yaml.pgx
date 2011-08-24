@@ -3,8 +3,10 @@ stream: <document>*
 document:
     <directive>*
     <header>?
-    <node>
+    <top_node>
     <trailer>?
 
-node:
+header: /<DASH><DASH><DASH><SPACE>*<EOL>?/
+
+top_node: <block_node> | <flow_node>
 
