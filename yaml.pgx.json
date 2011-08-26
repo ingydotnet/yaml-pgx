@@ -1,38 +1,38 @@
 {
-   "_FIRST_RULE" : "stream",
+   "+top" : "stream",
    "document" : {
-      "+all" : [
+      ".all" : [
          {
-            "+rule" : "directive",
-            "<" : "*"
+            "+mod" : "*",
+            ".rul" : "directive"
          },
          {
-            "+rule" : "header",
-            "<" : "?"
+            "+mod" : "?",
+            ".rul" : "header"
          },
          {
-            "+rule" : "top_node"
+            ".rul" : "top_node"
          },
          {
-            "+rule" : "trailer",
-            "<" : "?"
+            "+mod" : "?",
+            ".rul" : "trailer"
          }
       ]
    },
    "header" : {
-      "+re" : "--- *\\r?\\n?"
+      ".rgx" : "--- *\\r?\\n?"
    },
    "stream" : {
-      "+rule" : "document",
-      "<" : "*"
+      "+mod" : "*",
+      ".rul" : "document"
    },
    "top_node" : {
-      "+any" : [
+      ".any" : [
          {
-            "+rule" : "block_node"
+            ".rul" : "block_node"
          },
          {
-            "+rule" : "flow_node"
+            ".rul" : "flow_node"
          }
       ]
    }

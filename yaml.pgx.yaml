@@ -1,20 +1,20 @@
 ---
-_FIRST_RULE: stream
++top: stream
 document:
-  +all:
-  - +rule: directive
-    <: '*'
-  - +rule: header
-    <: '?'
-  - +rule: top_node
-  - +rule: trailer
-    <: '?'
+  .all:
+  - +mod: '*'
+    .rul: directive
+  - +mod: '?'
+    .rul: header
+  - .rul: top_node
+  - +mod: '?'
+    .rul: trailer
 header:
-  +re: '--- *\r?\n?'
+  .rgx: '--- *\r?\n?'
 stream:
-  +rule: document
-  <: '*'
+  +mod: '*'
+  .rul: document
 top_node:
-  +any:
-  - +rule: block_node
-  - +rule: flow_node
+  .any:
+  - .rul: block_node
+  - .rul: flow_node
