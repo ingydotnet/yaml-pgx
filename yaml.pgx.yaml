@@ -3,18 +3,18 @@
 document:
   .all:
   - +mod: '*'
-    .rul: directive
+    .ref: directive
   - +mod: '?'
-    .rul: header
-  - .rul: top_node
+    .ref: header
+  - .ref: top_node
   - +mod: '?'
-    .rul: trailer
+    .ref: trailer
 header:
   .rgx: '--- *\r?\n?'
 stream:
   +mod: '*'
-  .rul: document
+  .ref: document
 top_node:
   .any:
-  - .rul: block_node
-  - .rul: flow_node
+  - .ref: block_node
+  - .ref: flow_node

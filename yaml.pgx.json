@@ -4,18 +4,18 @@
       ".all" : [
          {
             "+mod" : "*",
-            ".rul" : "directive"
+            ".ref" : "directive"
          },
          {
             "+mod" : "?",
-            ".rul" : "header"
+            ".ref" : "header"
          },
          {
-            ".rul" : "top_node"
+            ".ref" : "top_node"
          },
          {
             "+mod" : "?",
-            ".rul" : "trailer"
+            ".ref" : "trailer"
          }
       ]
    },
@@ -24,15 +24,15 @@
    },
    "stream" : {
       "+mod" : "*",
-      ".rul" : "document"
+      ".ref" : "document"
    },
    "top_node" : {
       ".any" : [
          {
-            ".rul" : "block_node"
+            ".ref" : "block_node"
          },
          {
-            ".rul" : "flow_node"
+            ".ref" : "flow_node"
          }
       ]
    }
