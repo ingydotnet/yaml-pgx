@@ -1,39 +1,29 @@
 {
+   "+grammar" : "yaml",
    "+top" : "stream",
-   "document" : {
-      ".all" : [
-         {
-            "+mod" : "*",
-            ".ref" : "directive"
-         },
-         {
-            "+mod" : "?",
-            ".ref" : "header"
-         },
-         {
-            ".ref" : "top_node"
-         },
-         {
-            "+mod" : "?",
-            ".ref" : "trailer"
-         }
-      ]
+   "block_map" : {
+      "+min" : 1,
+      ".ref" : "block_key_val_pair"
    },
-   "header" : {
-      ".rgx" : "--- *\\r?\\n?"
-   },
-   "stream" : {
-      "+mod" : "*",
-      ".ref" : "document"
-   },
-   "top_node" : {
+   "block_node" : {
       ".any" : [
          {
-            ".ref" : "block_node"
+            ".ref" : "block_seq"
          },
          {
-            ".ref" : "flow_node"
+            ".ref" : "block_map"
          }
       ]
+   },
+   "block_seq" : {
+      "+min" : 1,
+      ".ref" : "block_seq_elem"
+   },
+   "document" : {
+      ".ref" : "block_node"
+   },
+   "stream" : {
+      "+min" : 0,
+      ".ref" : "document"
    }
 }

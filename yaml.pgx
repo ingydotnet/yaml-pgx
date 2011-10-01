@@ -1,3 +1,5 @@
+%grammar yaml
+
 stream: <document>*
 
 document:
