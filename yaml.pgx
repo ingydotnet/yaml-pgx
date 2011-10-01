@@ -1,12 +1,16 @@
 stream: <document>*
 
 document:
-    <directive>*
-    <header>?
-    <top_node>
-    <trailer>?
+    <block_node>
 
-header: /<DASH><DASH><DASH><SPACE>*<EOL>?/
+block_node:
+    <block_seq> |
+    <block_map>
 
-top_node: <block_node> | <flow_node>
+block_map:
+    <block_key_val_pair>+
+
+block_seq:
+    <block_seq_elem>+
+
 
