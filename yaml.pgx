@@ -1,18 +1,101 @@
+# This is the Pegex grammar for YAML 1.2.
+
+# It is currently in a fledgling state. It is only intended to pass the YAML
+# TestML Suite. Eventually it will be able to parse any valid YAML 1.2
+# document.
+
+# To Do:
+# - Comments (maybe as whitespace)
+# - Directives
+# - Tags
+
 %grammar yaml
+%version 1.2
 
-stream: <document>*
+yaml_stream: <yaml_document>*
 
-document:
-    <block_node>
+yaml_document:
+    <document_header>?
+    [ <flow_collection> | <block_node> ]
+    <document_footer>?
+
+document_header:
+    /(<DASH><DASH><DASH>)~/
+
+document_footer:
+    /<DOT><DOT><DOT><EOL>/
 
 block_node:
     <block_seq> |
-    <block_map>
+    <block_map> |
+    <block_scalar>
 
 block_map:
-    <block_key_val_pair>+
+    <indent>
+    <block_pair>+
+    <undent>
 
 block_seq:
-    <block_seq_elem>+
+    <indent>
+    <block_elem>+
+    <undent>
 
+block_scalar:
+    <double_quoted> |
+    <single_quoted> |
+    <literal_string> |
+    <folded_string> |
+    <plain_string> |
+    <empty_string>
 
+block_pair:
+    <dent> <block_key> /~<COLON>~/ <block_value>
+
+block_elem:
+    <dent> /<DASH><SPACE>/ <block_value>
+
+block_key:
+    <double_quoted> |
+    <single_quoted> |
+    <plain_string>
+
+block_value:
+    <flow_collection> |
+    <block_node>
+
+flow_collection:
+    <flow_map> |
+    <flow_seq>
+
+flow_node:
+    <flow_collection> |
+    <flow_scalar>
+
+flow_map:
+    /~<LCURLY>~/ <flow_pair>* % /~<COMMA>~/ /~<RCURLY>~/
+
+flow_seq:
+    /~<LSQUARE>~/ <flow_node>* % /~<COMMA>~/ /~<RSQUARE>~/
+
+flow_scalar:
+    <double_quoted> |
+    <single_quoted> |
+    <plain_string>
+
+flow_pair: <flow_node> /~<COLON>~/ <flow_node>
+
+double_quoted: /<DOUBLE>((?:<BACK><BACK>|<BACK><DOUBLE>|[^<DOUBLE><BREAK>])*)<DOUBLE>/
+
+single_quoted: /<SINGLE>((?:<SINGLE><SINGLE>|[^<SINGLE>]))<SINGLE>/
+
+plain_string: /([^<non_starters>][^non_plain]*)/
+
+empty_string: //
+
+literal_string: `literal_string not yet supported`
+
+folded_string: `folded_string not yet supported`
+
+non_starters: /<PERCENT><SINGLE><DOUBLE><SPACE>/
+
+non_plain: /<COLON>/
