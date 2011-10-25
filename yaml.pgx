@@ -9,8 +9,8 @@
 # - Directives
 # - Tags
 
-%grammar yaml
-%version 1.2
+# %grammar yaml
+# %version 1.2
 
 yaml_stream: <yaml_document>*
 
@@ -31,14 +31,14 @@ block_node:
     <block_scalar>
 
 block_map:
-    <indent>
+    <INDENT>
     <block_pair>+
-    <undent>
+    <UNDENT>
 
 block_seq:
-    <indent>
+    <INDENT>
     <block_elem>+
-    <undent>
+    <UNDENT>
 
 block_scalar:
     <double_quoted> |
@@ -49,10 +49,10 @@ block_scalar:
     <empty_string>
 
 block_pair:
-    <dent> <block_key> /~<COLON>~/ <block_value>
+    <DENT> <block_key> /~<COLON>~/ <block_value>
 
 block_elem:
-    <dent> /<DASH><SPACE>/ <block_value>
+    <DENT> /<DASH><SPACE>/ <block_value>
 
 block_key:
     <double_quoted> |
