@@ -31,14 +31,14 @@ block_node:
     <block_scalar>
 
 block_map:
-    <INDENT>
+    <indent>
     <block_pair>+
-    <UNDENT>
+    <undent>
 
 block_seq:
-    <INDENT>
+    <indent>
     <block_elem>+
-    <UNDENT>
+    <undent>
 
 block_scalar:
     <double_quoted> |
@@ -49,10 +49,10 @@ block_scalar:
     <empty_string>
 
 block_pair:
-    <DENT> <block_key> /~<COLON>~/ <block_value>
+    <dent> <block_key> /~<COLON>~/ <block_value>
 
 block_elem:
-    <DENT> /<DASH><SPACE>/ <block_value>
+    <dent> /<DASH><SPACE>/ <block_value>
 
 block_key:
     <double_quoted> |
