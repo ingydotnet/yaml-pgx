@@ -43,16 +43,17 @@ block_seq:
 block_scalar:
     <double_quoted> |
     <single_quoted> |
-    <literal_string> |
-    <folded_string> |
     <plain_string> |
     <empty_string>
 
+#     <literal_string> |
+#     <folded_string> |
+
 block_pair:
-    <dent> <block_key> /~<COLON>~/ <block_value>
+    <indentation> <block_key> /~<COLON>~/ <block_value> <BREAK>
 
 block_elem:
-    <dent> /<DASH><SPACE>/ <block_value>
+    <indentation> /<DASH><SPACE>/ <block_value> <BREAK>
 
 block_key:
     <double_quoted> |
@@ -88,7 +89,7 @@ double_quoted: /<DOUBLE>((?:<BACK><BACK>|<BACK><DOUBLE>|[^<DOUBLE><BREAK>])*)<DO
 
 single_quoted: /<SINGLE>((?:<SINGLE><SINGLE>|[^<SINGLE>]))<SINGLE>/
 
-plain_string: /([^<non_starters>][^non_plain]*)/
+plain_string: /([^<non_starters>][^<non_plain>]*)/
 
 empty_string: //
 
@@ -98,4 +99,4 @@ folded_string: `folded_string not yet supported`
 
 non_starters: /<PERCENT><SINGLE><DOUBLE><SPACE>/
 
-non_plain: /<COLON>/
+non_plain: /<COLON><BREAK>/
