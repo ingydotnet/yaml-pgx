@@ -1,12 +1,13 @@
 ---
-+grammar: yaml
 +top: yaml_stream
-+version: '1.2'
+BREAK:
+  .rgx: \n
 block_elem:
   .all:
-  - .ref: dent
+  - .ref: indentation
   - .rgx: '\- '
   - .ref: block_value
+  - .ref: BREAK
 block_key:
   .any:
   - .ref: double_quoted
@@ -25,16 +26,15 @@ block_node:
   - .ref: block_scalar
 block_pair:
   .all:
-  - .ref: dent
+  - .ref: indentation
   - .ref: block_key
   - .rgx: \s*:\s*
   - .ref: block_value
+  - .ref: BREAK
 block_scalar:
   .any:
   - .ref: double_quoted
   - .ref: single_quoted
-  - .ref: literal_string
-  - .ref: folded_string
   - .ref: plain_string
   - .ref: empty_string
 block_seq:
@@ -89,12 +89,8 @@ flow_seq:
     .sep:
       .rgx: \s*,\s*
   - .rgx: \s*\]\s*
-folded_string:
-  .err: folded_string not yet supported
-literal_string:
-  .err: literal_string not yet supported
 plain_string:
-  .rgx: ([^%'" ][^non_plain]*)
+  .rgx: ([^%'" ][^:\n]*)
 single_quoted:
   .rgx: '''((?:''''|[^'']))'''
 yaml_document:

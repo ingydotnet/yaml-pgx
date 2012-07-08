@@ -1,17 +1,21 @@
 {
-   "+grammar" : "yaml",
    "+top" : "yaml_stream",
-   "+version" : "1.2",
+   "BREAK" : {
+      ".rgx" : "\\n"
+   },
    "block_elem" : {
       ".all" : [
          {
-            ".ref" : "dent"
+            ".ref" : "indentation"
          },
          {
             ".rgx" : "\\- "
          },
          {
             ".ref" : "block_value"
+         },
+         {
+            ".ref" : "BREAK"
          }
       ]
    },
@@ -58,7 +62,7 @@
    "block_pair" : {
       ".all" : [
          {
-            ".ref" : "dent"
+            ".ref" : "indentation"
          },
          {
             ".ref" : "block_key"
@@ -68,6 +72,9 @@
          },
          {
             ".ref" : "block_value"
+         },
+         {
+            ".ref" : "BREAK"
          }
       ]
    },
@@ -78,12 +85,6 @@
          },
          {
             ".ref" : "single_quoted"
-         },
-         {
-            ".ref" : "literal_string"
-         },
-         {
-            ".ref" : "folded_string"
          },
          {
             ".ref" : "plain_string"
@@ -209,14 +210,8 @@
          }
       ]
    },
-   "folded_string" : {
-      ".err" : "folded_string not yet supported"
-   },
-   "literal_string" : {
-      ".err" : "literal_string not yet supported"
-   },
    "plain_string" : {
-      ".rgx" : "([^%'\" ][^non_plain]*)"
+      ".rgx" : "([^%'\" ][^:\\n]*)"
    },
    "single_quoted" : {
       ".rgx" : "'((?:''|[^']))'"

@@ -16,7 +16,7 @@ yaml_stream: <yaml_document>*
 
 yaml_document:
     <document_header>?
-    [ <flow_collection> | <block_node> ]
+    ( <flow_collection> | <block_node> )
     <document_footer>?
 
 document_header:
