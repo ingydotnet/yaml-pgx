@@ -1,5 +1,7 @@
 ---
++grammar: yaml
 +top: yaml_stream
++version: '1.2'
 BREAK:
   .rgx: \n
 block_elem:
@@ -50,7 +52,7 @@ block_value:
 document_footer:
   .rgx: \.\.\.\r?\n
 document_header:
-  .rgx: (\-\-\-)\s*
+  .rgx: (\-\-\-)\s
 double_quoted:
   .rgx: '"((?:\\\\|\\"|[^"\n])*)"'
 empty_string:
@@ -92,7 +94,7 @@ flow_seq:
 plain_string:
   .rgx: ([^%'" ][^:\n]*)
 single_quoted:
-  .rgx: '''((?:''''|[^'']))'''
+  .rgx: '''((?:''''|[^''])*)'''
 yaml_document:
   .all:
   - +max: 1
@@ -100,6 +102,7 @@ yaml_document:
   - .any:
     - .ref: flow_collection
     - .ref: block_node
+    - .ref: block_scalar
   - +max: 1
     .ref: document_footer
 yaml_stream:

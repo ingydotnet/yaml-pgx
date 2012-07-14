@@ -1,5 +1,7 @@
 {
+   "+grammar" : "yaml",
    "+top" : "yaml_stream",
+   "+version" : "1.2",
    "BREAK" : {
       ".rgx" : "\\n"
    },
@@ -122,7 +124,7 @@
       ".rgx" : "\\.\\.\\.\\r?\\n"
    },
    "document_header" : {
-      ".rgx" : "(\\-\\-\\-)\\s*"
+      ".rgx" : "(\\-\\-\\-)\\s"
    },
    "double_quoted" : {
       ".rgx" : "\"((?:\\\\\\\\|\\\\\"|[^\"\\n])*)\""
@@ -214,7 +216,7 @@
       ".rgx" : "([^%'\" ][^:\\n]*)"
    },
    "single_quoted" : {
-      ".rgx" : "'((?:''|[^']))'"
+      ".rgx" : "'((?:''|[^'])*)'"
    },
    "yaml_document" : {
       ".all" : [
@@ -229,6 +231,9 @@
                },
                {
                   ".ref" : "block_node"
+               },
+               {
+                  ".ref" : "block_scalar"
                }
             ]
          },
