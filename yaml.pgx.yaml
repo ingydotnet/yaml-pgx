@@ -1,13 +1,13 @@
 ---
 +grammar: yaml
-+top: yaml_stream
++toprule: yaml_stream
 +version: '1.2'
 BREAK:
   .rgx: \n
 block_elem:
   .all:
   - .ref: indentation
-  - .rgx: '\- '
+  - .rgx: '\-\ '
   - .ref: block_value
   - .ref: BREAK
 block_key:
@@ -92,7 +92,7 @@ flow_seq:
       .rgx: \s*,\s*
   - .rgx: \s*\]\s*
 plain_string:
-  .rgx: ([^%'" ][^:\n]*)
+  .rgx: ([^%'"\ ][^:\n]*)
 single_quoted:
   .rgx: '''((?:''''|[^''])*)'''
 yaml_document:

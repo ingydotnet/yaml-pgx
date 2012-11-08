@@ -1,6 +1,6 @@
 {
    "+grammar" : "yaml",
-   "+top" : "yaml_stream",
+   "+toprule" : "yaml_stream",
    "+version" : "1.2",
    "BREAK" : {
       ".rgx" : "\\n"
@@ -11,7 +11,7 @@
             ".ref" : "indentation"
          },
          {
-            ".rgx" : "\\- "
+            ".rgx" : "\\-\\ "
          },
          {
             ".ref" : "block_value"
@@ -213,7 +213,7 @@
       ]
    },
    "plain_string" : {
-      ".rgx" : "([^%'\" ][^:\\n]*)"
+      ".rgx" : "([^%'\"\\ ][^:\\n]*)"
    },
    "single_quoted" : {
       ".rgx" : "'((?:''|[^'])*)'"
