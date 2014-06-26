@@ -1,0 +1,62 @@
+%grammar: yaml
+%version: 0.0.1
+%extends: pegex
+# %include
+# %inherit
+# %exclude
+
+# A YAML Stream is the topmost parsing unit. It is the entire file or string or
+# socket (etc) content. It consists of zero or more YAML documents. Most
+# streams consist of a single document, but YAML allows many or none.
+yaml-stream:
+  ( comment-line | blank-line )
+  yaml-document*
+
+# A YAML Document is a single cohesive node (map/seq/scalar).
+yaml-document:
+  ( top-mapping | top-sequence | top-scalar )
+
+# A directive is a line that is an instruction to the parser. There are
+# currently only 2 directives in YAML: 'YAML' (YAML spec version to be applied)
+# and 'TAG' (short names for tag urls).
+yaml-directive:
+  '%' yaml-keyword + directive-value $
+
+yaml-header:
+  '---' (node-prefix)* $
+
+yaml-footer:
+  '...' $
+
+top-mapping:
+  ( yaml-directive | comment-line | blank-line )*
+  yaml-header?
+  ( flow-mapping | block-mapping )
+  ( EOS | =yaml-header | yaml-footer )
+
+flow-mapping:
+  '{' ( flow-pair | flow-elem )* '}'
+
+block-mapping:
+  indent
+  block-pair*
+  undent
+
+block-pair:
+  ondent
+  block-key
+  COLON SPACE
+  block-value
+
+yaml-keyword:
+  /(YAML|TAG)/
+
+# Comment and whitespace tokens
+$: comment-eol | blank-eol
++: /<SP>+/
+-: /<SP>*/
+comment-line: '#' ANY* EOL
+comment-eol:  '#' ANY* EOL
+blank-line: BLANK* EOL
+blank-eol:  BLANK* EOL
+

@@ -1,0 +1,30 @@
+# This file is an example of all the Pegex things that can be done in a Pegex
+# grammar file.
+
+# This is a line comment. Blank line is comment too:
+
+# The following lines starting with % are call 'directives'. Directives specify
+# meta information about the grammar. The directives are specified before the
+# first rule in the grammar. The 'grammar' and 'version' directives are
+# required.
+%grammar this-grammar-name      # Grammar's reference name.
+%version 1.2.3                  # Grammar semver version
+%extends grammar-name           # Sometimes a grammar subclasses another
+%include grammar-name           # Include the rules of one grammar into another
+%include pegex-atoms            # Pegex Atoms are rules of smallest regex parts
+
+%symrule >> INDENT
+
+# The things ending in '-name' above are symbolic names. They do not infer a
+# way to find the things they name. The names need to be resolved and the
+# actions performed on them before a grammar can be used for a parse operation.
+
+>>: indent
+<<: undent
+==: ondent
+
+-: /SPACE*/
+--: /SPACE+/
++: --
+
+rule: a b? c* d+ e+2 f+3-5 g+4+

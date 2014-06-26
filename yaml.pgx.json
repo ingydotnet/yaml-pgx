@@ -1,250 +1,361 @@
 {
    "+grammar" : "yaml",
    "+toprule" : "yaml_stream",
-   "+version" : "1.2",
-   "BREAK" : {
-      ".rgx" : "\\n"
+   "+version" : "0.0.1",
+   "EOL" : {
+      ".rgx" : "\\r?\\n"
    },
-   "block_elem" : {
-      ".all" : [
-         {
-            ".ref" : "indentation"
-         },
-         {
-            ".rgx" : "\\-\\ "
-         },
-         {
-            ".ref" : "block_value"
-         },
-         {
-            ".ref" : "BREAK"
-         }
-      ]
+   "SPACE" : {
+      ".rgx" : "\\ "
+   },
+   "block_indent" : {
+      ".rgx" : ""
    },
    "block_key" : {
-      ".any" : [
-         {
-            ".ref" : "double_quoted"
-         },
-         {
-            ".ref" : "single_quoted"
-         },
-         {
-            ".ref" : "plain_string"
-         }
-      ]
+      ".ref" : "block_scalar"
    },
-   "block_map" : {
+   "block_mapping" : {
       ".all" : [
          {
-            ".ref" : "indent"
+            ".ref" : "block_indent"
          },
          {
-            "+min" : 1,
-            ".ref" : "block_pair"
+            ".all" : [
+               {
+                  ".ref" : "block_mapping_pair"
+               },
+               {
+                  "+min" : 0,
+                  "-flat" : 1,
+                  ".all" : [
+                     {
+                        ".ref" : "ignore_line"
+                     },
+                     {
+                        ".ref" : "block_mapping_pair"
+                     }
+                  ]
+               }
+            ]
          },
          {
-            ".ref" : "undent"
+            ".all" : [
+               {
+                  ".ref" : "EOL"
+               },
+               {
+                  ".ref" : "block_undent"
+               }
+            ]
          }
       ]
    },
-   "block_node" : {
-      ".any" : [
-         {
-            ".ref" : "block_seq"
-         },
-         {
-            ".ref" : "block_map"
-         },
-         {
-            ".ref" : "block_scalar"
-         }
-      ]
-   },
-   "block_pair" : {
+   "block_mapping_pair" : {
       ".all" : [
          {
-            ".ref" : "indentation"
+            ".ref" : "block_ondent"
          },
          {
             ".ref" : "block_key"
          },
          {
-            ".rgx" : "\\s*:\\s*"
+            ".ref" : "mapping_separator"
          },
          {
             ".ref" : "block_value"
-         },
-         {
-            ".ref" : "BREAK"
          }
       ]
+   },
+   "block_ondent" : {
+      ".rgx" : ""
    },
    "block_scalar" : {
-      ".any" : [
+      ".rgx" : "(\\|\\r?\\nXXX|\\>\\r?\\nXXX|\"[^\"]*\"|'[^']*'|(?![&\\*\\#\\{\\}\\[\\]%`]).+?(?=:\\ |\\r?\\n|\\z))"
+   },
+   "block_sequence" : {
+      ".all" : [
          {
-            ".ref" : "double_quoted"
+            ".ref" : "block_sequence_entry"
          },
          {
-            ".ref" : "single_quoted"
+            "+min" : 0,
+            "-flat" : 1,
+            ".all" : [
+               {
+                  ".ref" : "list_separator"
+               },
+               {
+                  ".ref" : "block_sequence_entry"
+               }
+            ]
          },
          {
-            ".ref" : "plain_string"
-         },
-         {
-            ".ref" : "empty_string"
+            "+max" : 1,
+            ".ref" : "list_separator"
          }
       ]
    },
-   "block_seq" : {
-      ".all" : [
-         {
-            ".ref" : "indent"
-         },
-         {
-            "+min" : 1,
-            ".ref" : "block_elem"
-         },
-         {
-            ".ref" : "undent"
-         }
-      ]
+   "block_sequence_entry" : {
+      ".rgx" : "\\-\\ +(\\|\\r?\\nXXX|\\>\\r?\\nXXX|\"[^\"]*\"|'[^']*'|(?![&\\*\\#\\{\\}\\[\\]%`]).+?(?=:\\ |\\r?\\n|\\z))\\r?\\n"
+   },
+   "block_undent" : {
+      ".rgx" : ""
    },
    "block_value" : {
       ".any" : [
          {
-            ".ref" : "flow_collection"
+            ".ref" : "block_scalar"
          },
          {
-            ".ref" : "block_node"
+            ".ref" : "flow_node"
          }
       ]
    },
-   "document_footer" : {
+   "document_foot" : {
       ".rgx" : "\\.\\.\\.\\r?\\n"
    },
-   "document_header" : {
-      ".rgx" : "(\\-\\-\\-)\\s"
+   "document_head" : {
+      ".rgx" : "\\-\\-\\-(?:\\ +|(?=\\r?\\n))"
    },
-   "double_quoted" : {
-      ".rgx" : "\"((?:\\\\\\\\|\\\\\"|[^\"\\n])*)\""
-   },
-   "empty_string" : {
-      ".rgx" : ""
-   },
-   "flow_collection" : {
-      ".any" : [
-         {
-            ".ref" : "flow_map"
-         },
-         {
-            ".ref" : "flow_seq"
-         }
-      ]
-   },
-   "flow_map" : {
+   "flow_mapping" : {
       ".all" : [
          {
-            ".rgx" : "\\s*\\{\\s*"
+            ".ref" : "flow_mapping_start"
          },
          {
-            "+min" : 0,
-            ".ref" : "flow_pair",
-            ".sep" : {
-               ".rgx" : "\\s*,\\s*"
-            }
+            "+max" : 1,
+            ".all" : [
+               {
+                  ".ref" : "flow_mapping_pair"
+               },
+               {
+                  "+min" : 0,
+                  "-flat" : 1,
+                  ".all" : [
+                     {
+                        ".ref" : "list_separator"
+                     },
+                     {
+                        ".ref" : "flow_mapping_pair"
+                     }
+                  ]
+               },
+               {
+                  "+max" : 1,
+                  ".ref" : "list_separator"
+               }
+            ]
          },
          {
-            ".rgx" : "\\s*\\}\\s*"
+            ".ref" : "flow_mapping_end"
          }
       ]
+   },
+   "flow_mapping_end" : {
+      ".rgx" : "\\s*\\}\\s*"
+   },
+   "flow_mapping_pair" : {
+      ".all" : [
+         {
+            ".ref" : "flow_node"
+         },
+         {
+            ".ref" : "mapping_separator"
+         },
+         {
+            ".ref" : "flow_node"
+         }
+      ]
+   },
+   "flow_mapping_start" : {
+      ".rgx" : "\\s*\\{\\s*"
    },
    "flow_node" : {
       ".any" : [
          {
-            ".ref" : "flow_collection"
+            ".ref" : "flow_sequence"
+         },
+         {
+            ".ref" : "flow_mapping"
          },
          {
             ".ref" : "flow_scalar"
          }
       ]
    },
-   "flow_pair" : {
+   "flow_scalar" : {
+      ".rgx" : "(\"[^\"]*\"|'[^']*'|(?![&\\*\\#\\{\\}\\[\\]%`]).+?(?=[&\\*\\#\\{\\}\\[\\]%,]|:\\ |,\\ |\\r?\\n|\\z))"
+   },
+   "flow_sequence" : {
       ".all" : [
          {
-            ".ref" : "flow_node"
+            ".ref" : "flow_sequence_start"
          },
          {
-            ".rgx" : "\\s*:\\s*"
+            "+max" : 1,
+            ".all" : [
+               {
+                  ".ref" : "flow_sequence_entry"
+               },
+               {
+                  "+min" : 0,
+                  "-flat" : 1,
+                  ".all" : [
+                     {
+                        ".ref" : "list_separator"
+                     },
+                     {
+                        ".ref" : "flow_sequence_entry"
+                     }
+                  ]
+               },
+               {
+                  "+max" : 1,
+                  ".ref" : "list_separator"
+               }
+            ]
          },
          {
-            ".ref" : "flow_node"
+            ".ref" : "flow_sequence_end"
          }
       ]
    },
-   "flow_scalar" : {
+   "flow_sequence_end" : {
+      ".rgx" : "\\s*\\]\\s*"
+   },
+   "flow_sequence_entry" : {
+      ".ref" : "flow_scalar"
+   },
+   "flow_sequence_start" : {
+      ".rgx" : "\\s*\\[\\s*"
+   },
+   "ignore_line" : {
+      ".rgx" : "(?:[\\ \\t]*|\\#.*)\\r?\\n"
+   },
+   "list_separator" : {
+      ".rgx" : ",\\ +"
+   },
+   "mapping_separator" : {
+      ".rgx" : ":\\ +"
+   },
+   "node_alias" : {
+      ".rgx" : "\\*(\\w+)"
+   },
+   "node_anchor" : {
+      ".rgx" : "\\&(\\w+)"
+   },
+   "node_prefix" : {
       ".any" : [
          {
-            ".ref" : "double_quoted"
+            ".all" : [
+               {
+                  ".ref" : "node_anchor"
+               },
+               {
+                  "+max" : 1,
+                  ".all" : [
+                     {
+                        "+min" : 1,
+                        ".ref" : "SPACE"
+                     },
+                     {
+                        ".ref" : "node_tag"
+                     }
+                  ]
+               }
+            ]
          },
          {
-            ".ref" : "single_quoted"
-         },
-         {
-            ".ref" : "plain_string"
+            ".all" : [
+               {
+                  ".ref" : "node_tag"
+               },
+               {
+                  "+max" : 1,
+                  ".all" : [
+                     {
+                        "+min" : 1,
+                        ".ref" : "SPACE"
+                     },
+                     {
+                        ".ref" : "node_anchor"
+                     }
+                  ]
+               }
+            ]
          }
       ]
    },
-   "flow_seq" : {
-      ".all" : [
-         {
-            ".rgx" : "\\s*\\[\\s*"
-         },
-         {
-            "+min" : 0,
-            ".ref" : "flow_node",
-            ".sep" : {
-               ".rgx" : "\\s*,\\s*"
-            }
-         },
-         {
-            ".rgx" : "\\s*\\]\\s*"
-         }
-      ]
+   "node_tag" : {
+      ".rgx" : "!!?(\\w+)"
    },
-   "plain_string" : {
-      ".rgx" : "([^%'\"\\ ][^:\\n]*)"
-   },
-   "single_quoted" : {
-      ".rgx" : "'((?:''|[^'])*)'"
-   },
-   "yaml_document" : {
+   "top_node" : {
       ".all" : [
          {
             "+max" : 1,
-            ".ref" : "document_header"
+            ".ref" : "node_prefix"
          },
          {
             ".any" : [
                {
-                  ".ref" : "flow_collection"
+                  ".ref" : "node_alias"
                },
                {
-                  ".ref" : "block_node"
+                  ".ref" : "flow_mapping"
+               },
+               {
+                  ".ref" : "flow_sequence"
+               },
+               {
+                  ".ref" : "block_sequence"
+               },
+               {
+                  ".ref" : "block_mapping"
                },
                {
                   ".ref" : "block_scalar"
                }
             ]
+         }
+      ]
+   },
+   "yaml_document" : {
+      ".all" : [
+         {
+            "+max" : 1,
+            ".ref" : "document_head"
+         },
+         {
+            ".ref" : "top_node"
          },
          {
             "+max" : 1,
-            ".ref" : "document_footer"
+            ".ref" : "ignore_line"
+         },
+         {
+            "+max" : 1,
+            ".ref" : "document_foot"
          }
       ]
    },
    "yaml_stream" : {
-      "+min" : 0,
-      ".ref" : "yaml_document"
+      ".all" : [
+         {
+            "+min" : 0,
+            ".ref" : "ignore_line"
+         },
+         {
+            "+min" : 0,
+            ".all" : [
+               {
+                  ".ref" : "yaml_document"
+               },
+               {
+                  "+min" : 0,
+                  ".ref" : "ignore_line"
+               }
+            ]
+         }
+      ]
    }
 }

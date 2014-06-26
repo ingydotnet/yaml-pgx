@@ -1,134 +1,290 @@
-# This is the Pegex grammar for YAML 1.2.
+#------------------------------------------------------------------------------
+# Pegex Grammar for YAML 1.2
+#
+# This is a PEG (top-down) grammar for the YAML 1.2 language. It is in the
+# Pegex format, and can be used to construct a YAML parser in any language
+# where Pegex has been ported to. (Currently Perl, Ruby and JavaScript).
+#
+# Compared to the official YAML spec, this grammar should be much easier to
+# read and understand. It will also be fully documented, and will attempt to
+# have a test suite that exercises every rule path.
+#
+# The overall intent of this is to have one working grammar that backs up a
+# full YAML framework implementation in every programming language where YAML
+# is used. If this is acheived, then a bug in YAML can be fixed in one place,
+# for every language's implementaion.
+#
+# This grammar will go further than just parsing correct YAML. It will also
+# parse for common YAML errors, and try to report the most useful error
+# messages.
+#------------------------------------------------------------------------------
 
-# It is currently in a fledgling state. It is only intended to pass the YAML
-# TestML Suite. Eventually it will be able to parse any valid YAML 1.2
-# document.
-
-# To Do:
-# - Comments (maybe as whitespace)
-# - Directives
-# - Tags
+# Notes:
+# - Indentation will (probably) be done with indent / undent / ondent
+# - Need to check some rules against spec for accuracy.
+# - Make the grammar strict as possible until justified.
+# - Need to look for common errors in the grammar, and report them.
+# - Need to have tests for known errors.
 
 %grammar yaml
-%version 1.2
+%version 0.0.1
 
-yaml_stream: yaml_document*
+#------------------------------------------------------------------------------
+# High Level Constructs
+#------------------------------------------------------------------------------
 
-yaml_document:
-    document_header?
-    (
-        flow_collection |
-        block_node |
-        block_scalar
-    )
-    document_footer?
+# A YAML Stream is the top level rule, and accounts for the entirety of the
+# text being parsed. Basically, a stream is a set of zero or more documents,
+# but there can be ignorable comments on either side of an explicitly marked
+# document. NOTE: Not yet dealing with directives.
+yaml-stream:
+  ignore-line*
+  (
+    yaml-document
+    ignore-line*
+  )*
 
-document_header:
-    / ( <DASH><DASH><DASH> ) <ws> /
+# A YAML Document is a single node of any kind. It may start with an optional
+# explicit head marker, and may be terminated with an optional explicit foot
+# marker.
+yaml-document:
+  document-head?
+  top-node
+  # It is important to make sure we are on a line boundary here:
+  ignore-line?
+  document-foot?
 
-document_footer:
-    / <DOT><DOT><DOT> <EOL> /
+# A top level node can be quite a few distinct things:
+top-node:
+  node-prefix? (
+    | node-alias
+    | flow-mapping
+    | flow-sequence
+    | block-sequence
+    | block-mapping
+    | block-scalar
+  )
 
-block_node:
-    block_seq |
-    block_map |
-    block_scalar
+#------------------------------------------------------------------------------
+# Block Constructs
+#------------------------------------------------------------------------------
 
-block_map:
-    indent
-    block_pair+
-    undent
+# This rule identifies all the block nodes:
+block-node:
+  | block-sequence
+  | block-mapping
+  | block-scalar
 
-block_seq:
-    indent
-    block_elem+
-    undent
+# A block sequence is an indented set of nodes each starting with a
+# dash+space:
+block-sequence:
+  block-sequence-entry+ %% list-separator
 
-block_scalar:
-    double_quoted |
-    single_quoted |
-    plain_string |
-    empty_string
+# A block mapping is an indented set of key / value pairs separated by
+# colon+space:
+block-mapping:
+  block-indent
+  block-mapping-pair+ % ignore-line
+  (EOL block-undent)
 
-#     literal_string |
-#     folded_string |
+# TODO This needs to support and block-node:
+block-sequence-entry:
+  / DASH SPACE+ block-scalar EOL /
 
-block_pair:
-    indentation block_key /~<COLON>~/ block_value BREAK
+# A block mapping pair is a key / value separated by colon+space:
+block-mapping-pair:
+  block-ondent
+  block-key
+  mapping-separator
+  block-value
 
-block_elem:
-    indentation /<DASH><SPACE>/ block_value BREAK
+# A key can really be any node, but keeping it sane in the early going. Also a
+# block key scalar, has more limitations than a block value scalar.
+block-key: block-scalar
 
-block_key:
-    double_quoted |
-    single_quoted |
-    plain_string
+# A block value can be any block or flow node:
+# XXX Setting to block-scalar instead of block-node for now.
+block-value: block-scalar | flow-node
 
-block_value:
-    flow_collection |
-    block_node
-
-flow_collection:
-    flow_map |
-    flow_seq
-
-flow_node:
-    flow_collection |
-    flow_scalar
-
-flow_map:
-    / ~ <LCURLY> ~ /
-        flow_pair* % / ~ <COMMA> ~ /
-    / ~ <RCURLY> ~ /
-
-flow_seq:
-    / ~ <LSQUARE> ~ /
-        flow_node* % / ~ <COMMA> ~ /
-    / ~ <RSQUARE> ~ /
-
-flow_scalar:
-    double_quoted |
-    single_quoted |
-    plain_string
-
-flow_pair:
-    flow_node / ~ <COLON> ~ / flow_node
-
-double_quoted: /
-    <DOUBLE>
-        ((:
-            <BACK><BACK> |
-            <BACK><DOUBLE> |
-            [^<DOUBLE><BREAK>]
-        )*)
-    <DOUBLE>
+# A scalar in block form can take one of these 5 forms:
+block-scalar: /
+  ( literal-scalar
+  | folded-scalar
+  | double-quoted-scalar
+  | single-quoted-scalar
+  | block-plain-scalar
+  )
 /
 
-single_quoted: /
-    <SINGLE>
-        ((:
-            <SINGLE><SINGLE> |
-            [^<SINGLE>]
-        )*)
-    <SINGLE>
+#------------------------------------------------------------------------------
+# Flow Constructs:
+#------------------------------------------------------------------------------
+
+# A flow node can be any one of these 3 kinds:
+flow-node:
+  | flow-sequence
+  | flow-mapping
+  | flow-scalar
+
+# A flow sequence is zero or more nodes, separated by commas, inside square
+# brackets. A trailing comma is allowed.
+flow-sequence:
+  flow-sequence-start
+  flow-sequence-entry* %% list-separator
+  flow-sequence-end
+
+# A flow mapping is key / value pairs, separated by commas, inside curly
+# braces. A trailing comma is allowed.
+flow-mapping:
+  flow-mapping-start
+  flow-mapping-pair* %% list-separator
+  flow-mapping-end
+
+# A flow scalar only has 3 basic forms:
+flow-scalar: /
+  ( double-quoted-scalar
+  | single-quoted-scalar
+  | flow-plain-scalar
+  )
 /
 
-plain_string: / ( [^<non_starters>] [^<non_plain>]* ) /
+# A flow sequence entry is any flow node. This rule is an alias, and can maybe
+# go away later, but leaving this way now for clarity.
+flow-sequence-entry: flow-scalar
 
-empty_string: //
+# A flow mapping can have any node as key or value, but they must also be in
+# flow syntax.
+flow-mapping-pair:
+  flow-node
+  mapping-separator
+  flow-node
 
-literal_string: `literal_string not yet supported`
+# Starting and ending rules for flow collections:
+flow-sequence-start: /- '[' -/
+flow-sequence-end: /- ']' -/
+flow-mapping-start: /- '{' -/
+flow-mapping-end: /- '}' -/
 
-folded_string: `folded_string not yet supported`
+#------------------------------------------------------------------------------
+# Scalar Constructs
+#------------------------------------------------------------------------------
 
-non_starters: /
-    <PERCENT>
-    <SINGLE>
-    <DOUBLE>
-    <SPACE>
+# Literal scalar.
+# XXX Dummied out for now.
+literal-scalar: / '|' EOL 'XXX' /
+
+# Folded scalar.
+# XXX Dummied out for now.
+folded-scalar: / '>' EOL 'XXX' /
+
+# Double quoted scalar.
+# XXX Needs work.
+double-quoted-scalar: / DOUBLE [^ DOUBLE]* DOUBLE /
+
+# Single quoted scalar.
+# XXX Needs work.
+single-quoted-scalar: / SINGLE [^ SINGLE]* SINGLE /
+
+# Plain (unquoted) scalars can't start with syntax chars, and can't contain
+# colon+space.
+block-plain-scalar: /
+  (! char-non-start)
+  ANY+?
+  (= COLON SPACE | EOL | EOS)
 /
 
-non_plain: /
-    <COLON>
-    <BREAK>
+# Plain (unquoted) scalars in flow context are more restrictive than in block
+# context.
+flow-plain-scalar: /
+  (! char-non-start)
+  ANY+?
+  (= [ chars-syntax COMMA ] | COLON SPACE | COMMA SPACE | EOL | EOS)
 /
+
+#------------------------------------------------------------------------------
+# Other Constructs:
+#------------------------------------------------------------------------------
+
+# These are the placeholders for the indentation rules. Obviously, indentation
+# is not yet supported, but need to start thinking about them. Indentation
+# will likely be the trickiest part to get both right and elegant.
+block-indent: //
+block-ondent: //
+block-undent: //
+
+# A YAML header is 3 dashes followed by spaces or a newline:
+document-head: / '---' (: SPACE+ | (?= EOL)) /
+
+# A YAML footer is 3 dots followed by a newline:
+document-foot: / '...' EOL /
+
+# A node prefix is a anchor and / or tag in any order.
+# XXX This construct is hard in PEG. Look for easier way.
+node-prefix:
+  | node-anchor (SPACE+ node-tag)?
+  | node-tag (SPACE+ node-anchor)?
+
+# An explicit node tag.
+# TODO This is very incomplete!
+node-tag: / BANG BANG? ( WORD+ ) /
+
+# A Node Anchor is a name for a node. Like '&this'.
+# TODO See spec for real definition.
+node-anchor: / '&' ( WORD+ ) /
+
+# A Node Alias is a reference to an anchored node. Like '*this'.
+node-alias: / '*' ( WORD+ ) /
+
+# Mapping key / value is always separated by ': ' (colon + space)
+mapping-separator: / ':' SPACE+ /
+
+# List items separated by ',' (comma)
+# XXX Check spec if SPACE is needed
+list-separator: / ',' SPACE+ /
+
+# List of single chars that are YAML syntax (and thus must be avoided in
+# various contexts.
+chars-syntax: /
+  AMP
+  STAR
+  HASH
+  LCURLY
+  RCURLY
+  LSQUARE
+  RSQUARE
+  PERCENT
+/
+
+# YAML's Reserved Chars
+# TODO Need to check the spec.
+chars-reserved: /
+  GRAVE
+/
+
+char-non-start: /[
+  chars-syntax
+  chars-reserved
+]/
+
+
+#------------------------------------------------------------------------------
+# Whitespace Rules:
+#------------------------------------------------------------------------------
+
+# TODO Need to determine the - and + whitespace rule.
+
+# Ignore comments and whitespace until end of line. This rule will probably
+# get used a lot.
+ignore-line: / ignore-text EOL /
+
+# Ignorable text is spaces, tabs and a line comment.
+ignore-text: / (: blank-text | comment-text ) /
+
+# Spaces and tabs.
+blank-text: / BLANK* /
+
+# A '#' starts a comment until end of line.
+comment-text: / HASH ANY* /
+
+# Vim Helpers, until we get `pegex.vim` mode.
+# vim: set lisp sw=2:
