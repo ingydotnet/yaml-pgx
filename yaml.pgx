@@ -256,9 +256,9 @@ chars-syntax: /
 /
 
 # YAML's Reserved Chars
-# TODO Need to check the spec.
 chars-reserved: /
   GRAVE
+  AT
 /
 
 char-non-start: /[

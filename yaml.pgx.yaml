@@ -32,7 +32,7 @@ block_mapping_pair:
 block_ondent:
   .rgx: ''
 block_scalar:
-  .rgx: (\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`]).+?(?=:\ |\r?\n|\z))
+  .rgx: (\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\ |\r?\n|\z))
 block_sequence:
   .all:
   - .ref: block_sequence_entry
@@ -44,7 +44,7 @@ block_sequence:
   - +max: 1
     .ref: list_separator
 block_sequence_entry:
-  .rgx: \-\ +(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`]).+?(?=:\
+  .rgx: \-\ +(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\
     |\r?\n|\z))\r?\n
 block_undent:
   .rgx: ''
@@ -85,7 +85,7 @@ flow_node:
   - .ref: flow_mapping
   - .ref: flow_scalar
 flow_scalar:
-  .rgx: ("[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`]).+?(?=[&\*\#\{\}\[\]%,]|:\ |,\ |\r?\n|\z))
+  .rgx: ("[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=[&\*\#\{\}\[\]%,]|:\ |,\ |\r?\n|\z))
 flow_sequence:
   .all:
   - .ref: flow_sequence_start
