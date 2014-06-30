@@ -205,12 +205,9 @@ flow-plain-scalar: /
 # Other Constructs:
 #------------------------------------------------------------------------------
 
-# These are the placeholders for the indentation rules. Obviously, indentation
-# is not yet supported, but need to start thinking about them. Indentation
-# will likely be the trickiest part to get both right and elegant.
-block-indent: //
-block-ondent: //
-block-undent: //
+# block-indent: # This rule is written in code in the Grammar class.
+# block-ondent: # This rule is written in code in the Grammar class.
+# block-undent: # This rule is written in code in the Grammar class.
 
 # A YAML header is 3 dashes followed by spaces or a newline:
 document-head: / '---' (: SPACE+ | (?= EOL)) /
@@ -275,10 +272,10 @@ char-non-start: /[
 
 # Ignore comments and whitespace until end of line. This rule will probably
 # get used a lot.
-ignore-line: / ignore-text EOL /
+ignore-line: / ignore-text (= EOL) /
 
 # Ignorable text is spaces, tabs and a line comment.
-ignore-text: / (: blank-text | comment-text ) /
+ignore-text: / (: comment-text | blank-text ) /
 
 # Spaces and tabs.
 blank-text: / BLANK* /

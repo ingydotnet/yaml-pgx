@@ -6,8 +6,6 @@ EOL:
   .rgx: \r?\n
 SPACE:
   .rgx: '\ '
-block_indent:
-  .rgx: ''
 block_key:
   .ref: block_scalar
 block_mapping:
@@ -29,8 +27,6 @@ block_mapping_pair:
   - .ref: block_key
   - .ref: mapping_separator
   - .ref: block_value
-block_ondent:
-  .rgx: ''
 block_scalar:
   .rgx: (\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\ |\r?\n|\z))
 block_sequence:
@@ -46,8 +42,6 @@ block_sequence:
 block_sequence_entry:
   .rgx: \-\ +(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\
     |\r?\n|\z))\r?\n
-block_undent:
-  .rgx: ''
 block_value:
   .any:
   - .ref: block_scalar
@@ -107,7 +101,7 @@ flow_sequence_entry:
 flow_sequence_start:
   .rgx: \s*\[\s*
 ignore_line:
-  .rgx: (?:[\ \t]*|\#.*)\r?\n
+  .rgx: (?:\#.*|[\ \t]*)(?=\r?\n)
 list_separator:
   .rgx: ',\ +'
 mapping_separator:
