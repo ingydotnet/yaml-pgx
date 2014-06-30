@@ -84,7 +84,7 @@ block-sequence:
 # colon+space:
 block-mapping:
   block-indent
-  block-mapping-pair+ % ignore-line
+  block-mapping-pair+
   block-undent
 
 # TODO This needs to support and block-node:
