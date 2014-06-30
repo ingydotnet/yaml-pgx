@@ -80,16 +80,16 @@ block-node:
 block-sequence:
   block-sequence-entry+ %% list-separator
 
+# TODO This needs to support and block-node:
+block-sequence-entry:
+  / DASH SPACE+ block-scalar EOL /
+
 # A block mapping is an indented set of key / value pairs separated by
 # colon+space:
 block-mapping:
   block-indent
   block-mapping-pair+
   block-undent
-
-# TODO This needs to support and block-node:
-block-sequence-entry:
-  / DASH SPACE+ block-scalar EOL /
 
 # A block mapping pair is a key / value separated by colon+space:
 block-mapping-pair:
