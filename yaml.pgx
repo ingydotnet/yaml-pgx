@@ -20,7 +20,7 @@
 #------------------------------------------------------------------------------
 
 # Notes:
-# - Indentation will (probably) be done with indent / undent / ondent
+# - Indentation will be done with indent / ondent / undent
 # - Need to check some rules against spec for accuracy.
 # - Make the grammar strict as possible until justified.
 # - Need to look for common errors in the grammar, and report them.
@@ -85,7 +85,7 @@ block-sequence:
 block-mapping:
   block-indent
   block-mapping-pair+ % ignore-line
-  (EOL block-undent)
+  block-undent
 
 # TODO This needs to support and block-node:
 block-sequence-entry:
@@ -95,16 +95,15 @@ block-sequence-entry:
 block-mapping-pair:
   block-ondent
   block-key
-  mapping-separator
+  block-mapping-separator
   block-value
 
-# A key can really be any node, but keeping it sane in the early going. Also a
+
 # block key scalar, has more limitations than a block value scalar.
 block-key: block-scalar
 
 # A block value can be any block or flow node:
-# XXX Setting to block-scalar instead of block-node for now.
-block-value: block-scalar | flow-node
+block-value: flow-mapping | flow-sequence | block-node
 
 # A scalar in block form can take one of these 5 forms:
 block-scalar: /
@@ -156,7 +155,7 @@ flow-sequence-entry: flow-scalar
 # flow syntax.
 flow-mapping-pair:
   flow-node
-  mapping-separator
+  flow-mapping-separator
   flow-node
 
 # Starting and ending rules for flow collections:
@@ -190,7 +189,7 @@ single-quoted-scalar: / SINGLE [^ SINGLE]* SINGLE /
 block-plain-scalar: /
   (! char-non-start)
   ANY+?
-  (= COLON SPACE | EOL | EOS)
+  (= COLON WS | EOL | EOS)
 /
 
 # Plain (unquoted) scalars in flow context are more restrictive than in block
@@ -233,7 +232,8 @@ node-anchor: / '&' ( WORD+ ) /
 node-alias: / '*' ( WORD+ ) /
 
 # Mapping key / value is always separated by ': ' (colon + space)
-mapping-separator: / ':' SPACE+ /
+flow-mapping-separator: / ':' (: SPACE+ | SPACE* (= EOL)) /
+block-mapping-separator: / ':' (: SPACE+ | SPACE* (= EOL)) /
 
 # List items separated by ',' (comma)
 # XXX Check spec if SPACE is needed
