@@ -63,7 +63,7 @@ top-node:
     | block-sequence
     | block-mapping
     | block-scalar
-  )
+  ) ( EOL? EOS )
 
 #------------------------------------------------------------------------------
 # Block Constructs
