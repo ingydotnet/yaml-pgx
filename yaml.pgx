@@ -78,7 +78,7 @@ block-node:
 # A block sequence is an indented set of nodes each starting with a
 # dash+space:
 block-sequence:
-  block-sequence-entry+ %% list-separator
+  block-sequence-entry+
 
 # TODO This needs to support and block-node:
 block-sequence-entry:
@@ -98,12 +98,14 @@ block-mapping-pair:
   block-mapping-separator
   block-value
 
-
 # block key scalar, has more limitations than a block value scalar.
 block-key: block-scalar
 
 # A block value can be any block or flow node:
-block-value: flow-mapping | flow-sequence | block-node
+block-value:
+  | flow-mapping
+  | flow-sequence
+  | block-node
 
 # A scalar in block form can take one of these 5 forms:
 block-scalar: /
@@ -270,18 +272,17 @@ char-non-start: /[
 
 # TODO Need to determine the - and + whitespace rule.
 
-# Ignore comments and whitespace until end of line. This rule will probably
-# get used a lot.
+# Ignore comments and whitespace until end of line.
 ignore-line: / ignore-text (= EOL) /
 
 # Ignorable text is spaces, tabs and a line comment.
 ignore-text: / (: comment-text | blank-text ) /
 
-# Spaces and tabs.
-blank-text: / BLANK* /
-
 # A '#' starts a comment until end of line.
 comment-text: / HASH ANY* /
+
+# Spaces and tabs.
+blank-text: / BLANK* /
 
 # Vim Helpers, until we get `pegex.vim` mode.
 # vim: set lisp sw=2:
