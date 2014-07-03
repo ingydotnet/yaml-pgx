@@ -9,7 +9,7 @@
       ".rgx" : "\\ "
    },
    "block_key" : {
-      ".ref" : "block_scalar"
+      ".rgx" : "(\\|\\r?\\nXXX|\\>\\r?\\nXXX|\"[^\"]*\"|'[^']*'|(?![&\\*\\#\\{\\}\\[\\]%`\\@]).+?(?=:\\s|\\r?\\n|\\z)):(?:\\ +|\\ *(?=\\r?\\n))"
    },
    "block_mapping" : {
       ".all" : [
@@ -17,33 +17,11 @@
             ".ref" : "block_indent"
          },
          {
-            ".all" : [
-               {
-                  ".ref" : "block_mapping_pair"
-               },
-               {
-                  "+min" : 0,
-                  "-flat" : 1,
-                  ".all" : [
-                     {
-                        ".ref" : "ignore_line"
-                     },
-                     {
-                        ".ref" : "block_mapping_pair"
-                     }
-                  ]
-               }
-            ]
+            "+min" : 1,
+            ".ref" : "block_mapping_pair"
          },
          {
-            ".all" : [
-               {
-                  ".ref" : "EOL"
-               },
-               {
-                  ".ref" : "block_undent"
-               }
-            ]
+            ".ref" : "block_undent"
          }
       ]
    },
@@ -56,49 +34,43 @@
             ".ref" : "block_key"
          },
          {
-            ".ref" : "mapping_separator"
-         },
-         {
             ".ref" : "block_value"
          }
       ]
    },
-   "block_scalar" : {
-      ".rgx" : "(\\|\\r?\\nXXX|\\>\\r?\\nXXX|\"[^\"]*\"|'[^']*'|(?![&\\*\\#\\{\\}\\[\\]%`\\@]).+?(?=:\\ |\\r?\\n|\\z))"
-   },
-   "block_sequence" : {
-      ".all" : [
+   "block_node" : {
+      ".any" : [
          {
-            ".ref" : "block_sequence_entry"
+            ".ref" : "block_sequence"
          },
          {
-            "+min" : 0,
-            "-flat" : 1,
-            ".all" : [
-               {
-                  ".ref" : "list_separator"
-               },
-               {
-                  ".ref" : "block_sequence_entry"
-               }
-            ]
+            ".ref" : "block_mapping"
          },
          {
-            "+max" : 1,
-            ".ref" : "list_separator"
+            ".ref" : "block_scalar"
          }
       ]
    },
+   "block_scalar" : {
+      ".rgx" : "(\\|\\r?\\nXXX|\\>\\r?\\nXXX|\"[^\"]*\"|'[^']*'|(?![&\\*\\#\\{\\}\\[\\]%`\\@]).+?(?=:\\s|\\r?\\n|\\z))"
+   },
+   "block_sequence" : {
+      "+min" : 1,
+      ".ref" : "block_sequence_entry"
+   },
    "block_sequence_entry" : {
-      ".rgx" : "\\-\\ +(\\|\\r?\\nXXX|\\>\\r?\\nXXX|\"[^\"]*\"|'[^']*'|(?![&\\*\\#\\{\\}\\[\\]%`\\@]).+?(?=:\\ |\\r?\\n|\\z))\\r?\\n"
+      ".rgx" : "\\-\\ +(\\|\\r?\\nXXX|\\>\\r?\\nXXX|\"[^\"]*\"|'[^']*'|(?![&\\*\\#\\{\\}\\[\\]%`\\@]).+?(?=:\\s|\\r?\\n|\\z))\\r?\\n"
    },
    "block_value" : {
       ".any" : [
          {
-            ".ref" : "block_scalar"
+            ".ref" : "flow_mapping"
          },
          {
-            ".ref" : "flow_node"
+            ".ref" : "flow_sequence"
+         },
+         {
+            ".ref" : "block_node"
          }
       ]
    },
@@ -151,12 +123,15 @@
             ".ref" : "flow_node"
          },
          {
-            ".ref" : "mapping_separator"
+            ".ref" : "flow_mapping_separator"
          },
          {
             ".ref" : "flow_node"
          }
       ]
+   },
+   "flow_mapping_separator" : {
+      ".rgx" : ":(?:\\ +|\\ *(?=\\r?\\n))"
    },
    "flow_mapping_start" : {
       ".rgx" : "\\s*\\{\\s*"
@@ -225,9 +200,6 @@
    },
    "list_separator" : {
       ".rgx" : ",\\ +"
-   },
-   "mapping_separator" : {
-      ".rgx" : ":\\ +"
    },
    "node_alias" : {
       ".rgx" : "\\*(\\w+)"
@@ -307,6 +279,10 @@
                   ".ref" : "block_scalar"
                }
             ]
+         },
+         {
+            "+max" : 1,
+            ".ref" : "EOL"
          }
       ]
    },

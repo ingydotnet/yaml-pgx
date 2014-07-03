@@ -7,45 +7,36 @@ EOL:
 SPACE:
   .rgx: '\ '
 block_key:
-  .ref: block_scalar
+  .rgx: (\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z)):(?:\
+    +|\ *(?=\r?\n))
 block_mapping:
   .all:
   - .ref: block_indent
-  - .all:
-    - .ref: block_mapping_pair
-    - +min: 0
-      -flat: 1
-      .all:
-      - .ref: ignore_line
-      - .ref: block_mapping_pair
-  - .all:
-    - .ref: EOL
-    - .ref: block_undent
+  - +min: 1
+    .ref: block_mapping_pair
+  - .ref: block_undent
 block_mapping_pair:
   .all:
   - .ref: block_ondent
   - .ref: block_key
-  - .ref: mapping_separator
   - .ref: block_value
+block_node:
+  .any:
+  - .ref: block_sequence
+  - .ref: block_mapping
+  - .ref: block_scalar
 block_scalar:
-  .rgx: (\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\ |\r?\n|\z))
+  .rgx: (\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z))
 block_sequence:
-  .all:
-  - .ref: block_sequence_entry
-  - +min: 0
-    -flat: 1
-    .all:
-    - .ref: list_separator
-    - .ref: block_sequence_entry
-  - +max: 1
-    .ref: list_separator
+  +min: 1
+  .ref: block_sequence_entry
 block_sequence_entry:
-  .rgx: \-\ +(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\
-    |\r?\n|\z))\r?\n
+  .rgx: \-\ +(\|\r?\nXXX|\>\r?\nXXX|"[^"]*"|'[^']*'|(?![&\*\#\{\}\[\]%`\@]).+?(?=:\s|\r?\n|\z))\r?\n
 block_value:
   .any:
-  - .ref: block_scalar
-  - .ref: flow_node
+  - .ref: flow_mapping
+  - .ref: flow_sequence
+  - .ref: block_node
 document_foot:
   .rgx: \.\.\.\r?\n
 document_head:
@@ -69,8 +60,10 @@ flow_mapping_end:
 flow_mapping_pair:
   .all:
   - .ref: flow_node
-  - .ref: mapping_separator
+  - .ref: flow_mapping_separator
   - .ref: flow_node
+flow_mapping_separator:
+  .rgx: :(?:\ +|\ *(?=\r?\n))
 flow_mapping_start:
   .rgx: \s*\{\s*
 flow_node:
@@ -104,8 +97,6 @@ ignore_line:
   .rgx: (?:\#.*|[\ \t]*)(?=\r?\n)
 list_separator:
   .rgx: ',\ +'
-mapping_separator:
-  .rgx: :\ +
 node_alias:
   .rgx: \*(\w+)
 node_anchor:
@@ -139,6 +130,8 @@ top_node:
     - .ref: block_sequence
     - .ref: block_mapping
     - .ref: block_scalar
+  - +max: 1
+    .ref: EOL
 yaml_document:
   .all:
   - +max: 1
