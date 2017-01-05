@@ -82,7 +82,7 @@ block-sequence:
 
 # TODO This needs to support and block-node:
 block-sequence-entry:
-  / DASH SPACE+ block-scalar EOL /
+  DASH SPACE+ block-scalar EOL
 
 # A block mapping is an indented set of key / value pairs separated by
 # colon+space:
@@ -98,7 +98,7 @@ block-mapping-pair:
   block-value
 
 # block key scalar, has more limitations than a block value scalar.
-block-key: / block-scalar block-mapping-separator /
+block-key: / block-plain-scalar block-mapping-separator /
 
 # A block value can be any block or flow node:
 block-value:
@@ -107,14 +107,12 @@ block-value:
   | block-node
 
 # A scalar in block form can take one of these 5 forms:
-block-scalar: /
-  ( literal-scalar
+block-scalar:
+  | literal-scalar
   | folded-scalar
   | double-quoted-scalar
   | single-quoted-scalar
   | block-plain-scalar
-  )
-/
 
 #------------------------------------------------------------------------------
 # Flow Constructs:
@@ -189,7 +187,8 @@ single-quoted-scalar: / SINGLE [^ SINGLE]* SINGLE /
 # colon+space.
 block-plain-scalar: /
   (! char-non-start)
-  ANY+?
+  ( ANY+? )
+  (: WS+ comment-text)?
   (= COLON WS | EOL | EOS)
 /
 
