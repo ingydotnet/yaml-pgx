@@ -38,7 +38,7 @@
 # but there can be ignorable comments on either side of an explicitly marked
 # document. NOTE: Not yet dealing with directives.
 yaml-stream:
-  ignore-line*
+  (ignore-line EOL)*
   (
     yaml-document
     ignore-line*
@@ -78,7 +78,12 @@ block-node:
 # A block sequence is an indented set of nodes each starting with a
 # dash+space:
 block-sequence:
+  block-sequence-start
   block-sequence-entry+
+  block-sequence-end
+
+block-sequence-start: /(= DASH SPACE )/
+block-sequence-end: ''
 
 # TODO This needs to support and block-node:
 block-sequence-entry:
@@ -209,7 +214,10 @@ flow-plain-scalar: /
 # block-undent: # This rule is written in code in the Grammar class.
 
 # A YAML header is 3 dashes followed by spaces or a newline:
-document-head: / '---' (: SPACE+ | (?= EOL)) /
+document-head: /
+  '---'
+  (: SPACE+ | (?= EOL))
+/
 
 # A YAML footer is 3 dots followed by a newline:
 document-foot: / '...' EOL /
