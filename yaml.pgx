@@ -48,11 +48,11 @@ yaml-stream:
 # explicit head marker, and may be terminated with an optional explicit foot
 # marker.
 yaml-document:
-  document-head?
+  (document-head | document-start)
   top-node
   # It is important to make sure we are on a line boundary here:
   ignore-line?
-  document-foot?
+  (document-foot | document-end)
 
 # A top level node can be quite a few distinct things:
 top-node:
@@ -78,16 +78,14 @@ block-node:
 # A block sequence is an indented set of nodes each starting with a
 # dash+space:
 block-sequence:
-  block-sequence-start
+  block-indent-sequence
   block-sequence-entry+
-  block-sequence-end
-
-block-sequence-start: /(= DASH SPACE )/
-block-sequence-end: ''
+  block-undent
 
 # TODO This needs to support and block-node:
 block-sequence-entry:
-  DASH SPACE+ block-scalar EOL
+  block-ondent-sequence
+  DASH SPACE+ block-scalar
 
 # A block mapping is an indented set of key / value pairs separated by
 # colon+space:
@@ -219,8 +217,14 @@ document-head: /
   (: SPACE+ | (?= EOL))
 /
 
+# Implicit document start:
+document-start: /(= NS)/
+
 # A YAML footer is 3 dots followed by a newline:
 document-foot: / '...' EOL /
+
+# Implicit document ending:
+document-end: ''
 
 # A node prefix is a anchor and / or tag in any order.
 # XXX This construct is hard in PEG. Look for easier way.
