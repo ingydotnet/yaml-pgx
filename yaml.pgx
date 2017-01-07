@@ -142,12 +142,10 @@ flow-mapping:
   flow-mapping-end
 
 # A flow scalar only has 3 basic forms:
-flow-scalar: /
-  ( double-quoted-scalar
+flow-scalar:
+  | double-quoted-scalar
   | single-quoted-scalar
   | flow-plain-scalar
-  )
-/
 
 # A flow sequence entry is any flow node. This rule is an alias, and can maybe
 # go away later, but leaving this way now for clarity.
@@ -180,11 +178,11 @@ folded-scalar: / '>' EOL 'XXX' /
 
 # Double quoted scalar.
 # XXX Needs work.
-double-quoted-scalar: / DOUBLE [^ DOUBLE]* DOUBLE /
+double-quoted-scalar: / DOUBLE ([^ DOUBLE]*) DOUBLE /
 
 # Single quoted scalar.
 # XXX Needs work.
-single-quoted-scalar: / SINGLE [^ SINGLE]* SINGLE /
+single-quoted-scalar: / SINGLE ([^ SINGLE]*) SINGLE /
 
 # Plain (unquoted) scalars can't start with syntax chars, and can't contain
 # colon+space.
@@ -199,7 +197,7 @@ block-plain-scalar: /
 # context.
 flow-plain-scalar: /
   (! char-non-start)
-  ANY+?
+  ( ANY+? )
   (= [ chars-syntax COMMA ] | COLON SPACE | COMMA SPACE | EOL | EOS)
 /
 
