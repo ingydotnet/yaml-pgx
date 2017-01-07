@@ -49,13 +49,13 @@ yaml-stream:
 # marker.
 yaml-document:
   (document-head | document-start)
-  top-node
+  (yaml-node EOL?)
   # It is important to make sure we are on a line boundary here:
   ignore-line?
   (document-foot | document-end)
 
 # A top level node can be quite a few distinct things:
-top-node:
+yaml-node:
   node-prefix? (
     | node-alias
     | flow-mapping
@@ -63,7 +63,7 @@ top-node:
     | block-sequence
     | block-mapping
     | block-scalar
-  ) ( EOL? )
+  )
 
 #------------------------------------------------------------------------------
 # Block Constructs
@@ -85,20 +85,20 @@ block-sequence:
 # TODO This needs to support and block-node:
 block-sequence-entry:
   block-ondent-sequence
-  DASH SPACE+ block-scalar
+  DASH SPACE+ yaml-node
 
 # A block mapping is an indented set of key / value pairs separated by
 # colon+space:
 block-mapping:
   block-indent
-  block-mapping-pair+
+  block-mapping-pair+ %% (EOL ignore-line)*
   block-undent
 
 # A block mapping pair is a key / value separated by colon+space:
 block-mapping-pair:
   block-ondent
   block-key
-  block-value
+  yaml-node
 
 # block key scalar, has more limitations than a block value scalar.
 block-key: / block-plain-scalar block-mapping-separator /
@@ -123,15 +123,18 @@ block-scalar:
 
 # A flow node can be any one of these 3 kinds:
 flow-node:
-  | flow-sequence
-  | flow-mapping
-  | flow-scalar
+  node-prefix? (
+    | node-alias
+    | flow-sequence
+    | flow-mapping
+    | flow-scalar
+  )
 
 # A flow sequence is zero or more nodes, separated by commas, inside square
 # brackets. A trailing comma is allowed.
 flow-sequence:
   flow-sequence-start
-  flow-sequence-entry* %% list-separator
+  flow-node* %% list-separator
   flow-sequence-end
 
 # A flow mapping is key / value pairs, separated by commas, inside curly
@@ -147,10 +150,6 @@ flow-scalar:
   | single-quoted-scalar
   | flow-plain-scalar
 
-# A flow sequence entry is any flow node. This rule is an alias, and can maybe
-# go away later, but leaving this way now for clarity.
-flow-sequence-entry: flow-scalar
-
 # A flow mapping can have any node as key or value, but they must also be in
 # flow syntax.
 flow-mapping-pair:
@@ -160,9 +159,9 @@ flow-mapping-pair:
 
 # Starting and ending rules for flow collections:
 flow-sequence-start: /- '[' -/
-flow-sequence-end: /- ']' -/
+flow-sequence-end: /- ']' SPACE*/
 flow-mapping-start: /- '{' -/
-flow-mapping-end: /- '}' -/
+flow-mapping-end: /- '}' SPACE*/
 
 #------------------------------------------------------------------------------
 # Scalar Constructs
@@ -216,7 +215,7 @@ document-head: /
 /
 
 # Implicit document start:
-document-start: /(= NS)/
+document-start: /(= ALL)/
 
 # A YAML footer is 3 dots followed by a newline:
 document-foot: / '...' EOL /
@@ -232,22 +231,22 @@ node-prefix:
 
 # An explicit node tag.
 # TODO This is very incomplete!
-node-tag: / BANG BANG? ( WORD+ ) /
+node-tag: / BANG BANG? ( WORD+ ) -/
 
 # A Node Anchor is a name for a node. Like '&this'.
 # TODO See spec for real definition.
-node-anchor: / '&' ( WORD+ ) /
+node-anchor: / '&' ( WORD+ ) -/
 
 # A Node Alias is a reference to an anchored node. Like '*this'.
 node-alias: / '*' ( WORD+ ) /
 
 # Mapping key / value is always separated by ': ' (colon + space)
-flow-mapping-separator: / ':' (: SPACE+ | SPACE* (= EOL)) /
+flow-mapping-separator: /- ':' (: SPACE+ | SPACE* (= EOL)) /
 block-mapping-separator: / ':' (: SPACE+ | SPACE* (= EOL)) /
 
 # List items separated by ',' (comma)
 # XXX Check spec if SPACE is needed
-list-separator: / ',' SPACE+ /
+list-separator: /- ',' -/
 
 # List of single chars that are YAML syntax (and thus must be avoided in
 # various contexts.
