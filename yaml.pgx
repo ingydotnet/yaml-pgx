@@ -38,11 +38,16 @@
 # but there can be ignorable comments on either side of an explicitly marked
 # document. NOTE: Not yet dealing with directives.
 yaml-stream:
-  (ignore-line EOL)*
+  stream-start
+  ignore-line* % EOL
   (
     yaml-document
     ignore-line*
   )*
+  stream-end
+
+stream-start: ''
+stream-end: / EOL?/
 
 # A YAML Document is a single node of any kind. It may start with an optional
 # explicit head marker, and may be terminated with an optional explicit foot
@@ -56,10 +61,10 @@ yaml-document:
 
 # A top level node can be quite a few distinct things:
 yaml-node:
-  node-prefix? (
-    | node-alias
-    | flow-mapping
+  yaml-alias |
+  yaml-prefix? (
     | flow-sequence
+    | flow-mapping
     | block-sequence
     | block-mapping
     | block-scalar
@@ -82,10 +87,9 @@ block-sequence:
   block-sequence-entry+
   block-undent
 
-# TODO This needs to support and block-node:
 block-sequence-entry:
   block-ondent-sequence
-  DASH SPACE+ yaml-node
+  / DASH (: SPACE+ | SPACE* (= EOL))/ yaml-node
 
 # A block mapping is an indented set of key / value pairs separated by
 # colon+space:
@@ -123,8 +127,8 @@ block-scalar:
 
 # A flow node can be any one of these 3 kinds:
 flow-node:
-  node-prefix? (
-    | node-alias
+  yaml-prefix? (
+    | yaml-alias
     | flow-sequence
     | flow-mapping
     | flow-scalar
@@ -177,11 +181,11 @@ folded-scalar: / '>' EOL 'XXX' /
 
 # Double quoted scalar.
 # XXX Needs work.
-double-quoted-scalar: / DOUBLE ([^ DOUBLE]*) DOUBLE /
+double-quoted-scalar: / DOUBLE ((: BACK DOUBLE | [^ DOUBLE])*) DOUBLE /
 
 # Single quoted scalar.
 # XXX Needs work.
-single-quoted-scalar: / SINGLE ([^ SINGLE]*) SINGLE /
+single-quoted-scalar: / SINGLE ((: SINGLE SINGLE | [^ SINGLE])*) SINGLE /
 
 # Plain (unquoted) scalars can't start with syntax chars, and can't contain
 # colon+space.
@@ -210,12 +214,12 @@ flow-plain-scalar: /
 
 # A YAML header is 3 dashes followed by spaces or a newline:
 document-head: /
-  '---'
+  EOL? '---'
   (: SPACE+ | (?= EOL))
 /
 
 # Implicit document start:
-document-start: /(= ALL)/
+document-start: /(= ALL* [^ EOL])/
 
 # A YAML footer is 3 dots followed by a newline:
 document-foot: / '...' EOL /
@@ -225,20 +229,19 @@ document-end: ''
 
 # A node prefix is a anchor and / or tag in any order.
 # XXX This construct is hard in PEG. Look for easier way.
-node-prefix:
-  | node-anchor (SPACE+ node-tag)?
-  | node-tag (SPACE+ node-anchor)?
+yaml-prefix:
+  | yaml-anchor yaml-tag?
+  | yaml-tag yaml-anchor?
 
-# An explicit node tag.
-# TODO This is very incomplete!
-node-tag: / BANG BANG? ( WORD+ ) -/
+# An explicit node tag:
+yaml-tag: /('!' NS*) -/
 
 # A Node Anchor is a name for a node. Like '&this'.
 # TODO See spec for real definition.
-node-anchor: / '&' ( WORD+ ) -/
+yaml-anchor: / '&' ( WORD+ ) -/
 
 # A Node Alias is a reference to an anchored node. Like '*this'.
-node-alias: / '*' ( WORD+ ) /
+yaml-alias: / '*' ( WORD+ ) /
 
 # Mapping key / value is always separated by ': ' (colon + space)
 flow-mapping-separator: /- ':' (: SPACE+ | SPACE* (= EOL)) /
@@ -253,12 +256,13 @@ list-separator: /- ',' -/
 chars-syntax: /
   AMP
   STAR
-  HASH
   LCURLY
   RCURLY
   LSQUARE
   RSQUARE
   PERCENT
+  DOUBLE
+  SINGLE
 /
 
 # YAML's Reserved Chars
@@ -270,6 +274,7 @@ chars-reserved: /
 char-non-start: /[
   chars-syntax
   chars-reserved
+  HASH
 ]/
 
 
@@ -286,7 +291,7 @@ ignore-line: / ignore-text (= EOL) /
 ignore-text: / (: comment-text | blank-text ) /
 
 # A '#' starts a comment until end of line.
-comment-text: / HASH ANY* /
+comment-text: / BLANK* HASH ANY* /
 
 # Spaces and tabs.
 blank-text: / BLANK* /
